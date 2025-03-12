@@ -1,6 +1,4 @@
-// movies.ts
-
-interface Movie {
+export interface Movie {
     id: string;
     title: string;
     director: string;
@@ -9,54 +7,44 @@ interface Movie {
     ratings: number[];
 }
 
-const movies: Movie[] = [];
+const movies: Map<string, Movie> = new Map();
 
 export function addMovie(id: string, title: string, director: string, releaseYear: number, genre: string): void {
-    movies.push({ id, title, director, releaseYear, genre, ratings: [] });
+    movies.set(id, { id, title, director, releaseYear, genre, ratings: [] });
 }
 
 export function rateMovie(id: string, rating: number): void {
-    if (rating < 1 || rating > 5) {
-        throw new Error("Rating must be between 1 and 5.");
-    }
-    const movie = movies.find(m => m.id === id);
-    if (movie) {
-        movie.ratings.push(rating);
+    if (movies.has(id) && rating >= 1 && rating <= 5) {
+        movies.get(id)!.ratings.push(rating);
     }
 }
 
 export function getAverageRating(id: string): number | undefined {
-    const movie = movies.find(m => m.id === id);
-    if (movie && movie.ratings.length > 0) {
-        const sum = movie.ratings.reduce((acc, val) => acc + val, 0);
-        return sum / movie.ratings.length;
-    }
-    return undefined;
+    const movie = movies.get(id);
+    if (!movie || movie.ratings.length === 0) return undefined;
+    return movie.ratings.reduce((a, b) => a + b, 0) / movie.ratings.length;
 }
 
 export function getTopRatedMovies(): Movie[] {
-    return [...movies].sort((a, b) => (getAverageRating(b.id) || 0) - (getAverageRating(a.id) || 0));
+    return Array.from(movies.values()).sort((a, b) => (getAverageRating(b.id) || 0) - (getAverageRating(a.id) || 0));
 }
 
 export function getMoviesByGenre(genre: string): Movie[] {
-    return movies.filter(m => m.genre.toLowerCase() === genre.toLowerCase());
+    return Array.from(movies.values()).filter(movie => movie.genre === genre);
 }
 
 export function getMoviesByDirector(director: string): Movie[] {
-    return movies.filter(m => m.director.toLowerCase() === director.toLowerCase());
+    return Array.from(movies.values()).filter(movie => movie.director === director);
 }
 
 export function searchMoviesBasedOnKeyword(keyword: string): Movie[] {
-    return movies.filter(m => m.title.toLowerCase().includes(keyword.toLowerCase()));
+    return Array.from(movies.values()).filter(movie => movie.title.includes(keyword));
 }
 
 export function getMovie(id: string): Movie | undefined {
-    return movies.find(m => m.id === id);
+    return movies.get(id);
 }
 
 export function removeMovie(id: string): void {
-    const index = movies.findIndex(m => m.id === id);
-    if (index !== -1) {
-        movies.splice(index, 1);
-    }
+    movies.delete(id);
 }
