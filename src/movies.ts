@@ -47,8 +47,4 @@ export function getMovie(id: string): Movie | undefined {
 
 export function removeMovie(id: string): void {
     movies.delete(id);
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 468159b9f3b78cd266dccc1aa50181a4c7751390
